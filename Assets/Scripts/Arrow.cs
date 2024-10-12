@@ -34,7 +34,7 @@ public class Arrow : MonoBehaviour
         else if (Input.GetMouseButton(0) && CanMove)
         {
             ChangeArrowPosition();
-            RotateArrow();
+            //RotateArrow();
         }
 
         // Stops Dragging
