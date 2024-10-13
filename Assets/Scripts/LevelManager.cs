@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -10,13 +11,13 @@ public class LevelManager : MonoBehaviour
 
     [Header("UI")]
     public Vector3 startPosition;
-    public Vector3 finishPosition;
+    public Vector3 endPosition;
     public SpriteRenderer levelShapeBase ,levelShapeDotted, levelShapeTouch;
     public Animator shapeCompleteAnimator, shapesAnimator;
     [SerializeField] GameObject clickCirclePrefab, fakeArrowGO, fakeMasksGO;
     [Range(50,200)]
     public int amountOfMasksToPool;
-    public Vector3[] checkPoints;
+    public List<Vector3> checkPoints;
     public int checkPointIndex;
     [HideInInspector] public bool levelStarted, levelFinished;
     public SpriteRenderer test;
@@ -45,11 +46,8 @@ public class LevelManager : MonoBehaviour
 
         WorldToPixelAmount.x = Screen.width / WorldUnitsInCamera.x;
         WorldToPixelAmount.y = Screen.height / WorldUnitsInCamera.y;
-        Debug.LogError(FindRedPixelPosition());
-        Debug.LogError(ConvertToWorldUnits(FindRedPixelPosition()));
-        Debug.LogError(FindRedDot(test.sprite));
-        arrow.gameObject.transform.position = FindRedPixelPosition();
-        
+
+        arrow.gameObject.transform.position = startPosition;
     }
 
     private void Update()
@@ -102,6 +100,7 @@ public class LevelManager : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
+    #region Find Red Pixels in SpriteRenderer - Not Used
     Vector2 FindRedPixelPosition()
     {
         // Get the texture from the sprite
@@ -140,7 +139,6 @@ public class LevelManager : MonoBehaviour
         return color.r == 1 && color.g == 0f && color.b == 0f;
     }
 
-
     Vector2 FindRedDot(Sprite sprite)
     {
         Texture2D texture = sprite.texture;
@@ -177,4 +175,5 @@ public class LevelManager : MonoBehaviour
 
         return returnVec2;
     }
+    #endregion
 }

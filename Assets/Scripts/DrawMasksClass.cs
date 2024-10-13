@@ -44,7 +44,7 @@ public class DrawMasksClass : MonoBehaviour
     public void CheckIfFinished(Vector3 currentPosition)
     {
         // reached endPoint and doesn't reach it backward ! ( at least touched one of checkPoints )
-        if (Vector2.Distance(currentPosition, levelManager.finishPosition) <= 0.25f && levelManager.checkPointIndex >= 1)
+        if (Vector2.Distance(currentPosition, levelManager.endPosition) <= 0.25f && levelManager.checkPointIndex >= 1)
         {
             StartCoroutine(levelManager.FinishGame());
             Destroy(MaskObjectPool.instance.gameObject);

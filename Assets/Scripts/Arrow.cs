@@ -34,7 +34,7 @@ public class Arrow : MonoBehaviour
         else if (Input.GetMouseButton(0) && CanMove)
         {
             ChangeArrowPosition();
-            //RotateArrow();
+            RotateArrow();
         }
 
         // Stops Dragging
@@ -79,7 +79,7 @@ public class Arrow : MonoBehaviour
         // Check if we reached next checkPoint
         if (Vector3.Distance(transform.position, levelManager.checkPoints[levelManager.checkPointIndex]) <= 0.5f)
         {
-            if ((levelManager.checkPointIndex + 1) < levelManager.checkPoints.Length)
+            if ((levelManager.checkPointIndex + 1) < levelManager.checkPoints.Count)
             {
                 levelManager.checkPointIndex++;
                 touchPosition = levelManager.checkPoints[levelManager.checkPointIndex];
