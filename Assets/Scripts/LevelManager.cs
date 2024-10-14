@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -14,11 +15,14 @@ public class LevelManager : MonoBehaviour
     public Vector3 endPosition;
     public SpriteRenderer levelShapeBase ,levelShapeDotted, levelShapeTouch;
     public Animator shapeCompleteAnimator, shapesAnimator;
-    [SerializeField] GameObject clickCirclePrefab, fakeArrowGO, fakeMasksGO;
+    [SerializeField] GameObject  clickCirclePrefab, fakeArrowGO, fakeMasksGO;
+    public GameObject quranIcon;
+    [SerializeField] List<GameObject> quranIconsCreated;
+    public Transform quranIconsParent;
     [Range(50,200)]
     public int amountOfMasksToPool;
-    public List<Vector3> checkPoints;
-    public int checkPointIndex;
+    public List<Vector3> checkPoints, waitPoints;
+    public int checkPointIndex, waitPointIndex;
     [HideInInspector] public bool levelStarted, levelFinished;
     public SpriteRenderer test;
 
@@ -29,10 +33,10 @@ public class LevelManager : MonoBehaviour
     
     [Space]
     [Header("SFX")]
-    [SerializeField] AudioSource levelCompleteSFX;
+    [SerializeField] AudioSource levelCompleteAudioSource;
+    [SerializeField] AudioSource suraAudioSource;
+    [SerializeField] List<AudioClip> suraSFX;
 
-    public Vector2 WorldUnitsInCamera;
-    public Vector2 WorldToPixelAmount;
     private void Awake()
     {
         if(instance == null)
@@ -41,12 +45,19 @@ public class LevelManager : MonoBehaviour
 
     private void Start()
     {
-        WorldUnitsInCamera.y = Camera.main.orthographicSize * 2;
-        WorldUnitsInCamera.x = WorldUnitsInCamera.y * Screen.width / Screen.height;
+        #region Find Red Pixels in SpriteRenderer - Not Used
+        //WorldUnitsInCamera.y = Camera.main.orthographicSize * 2;
+        //WorldUnitsInCamera.x = WorldUnitsInCamera.y * Screen.width / Screen.height;
 
-        WorldToPixelAmount.x = Screen.width / WorldUnitsInCamera.x;
-        WorldToPixelAmount.y = Screen.height / WorldUnitsInCamera.y;
-
+        //WorldToPixelAmount.x = Screen.width / WorldUnitsInCamera.x;
+        //WorldToPixelAmount.y = Screen.height / WorldUnitsInCamera.y;
+        #endregion
+        for (int i = 0; i < waitPoints.Count; i++)
+        {
+            GameObject newQuranPrefab = Instantiate(quranIcon, quranIconsParent);
+            newQuranPrefab.transform.position = waitPoints[i];
+            quranIconsCreated.Add(newQuranPrefab);
+        }
         arrow.gameObject.transform.position = startPosition;
     }
 
@@ -95,12 +106,30 @@ public class LevelManager : MonoBehaviour
         shapeCompleteAnimator.enabled = true;
 
         arrow.sfxPlayer.Stop();
-        levelCompleteSFX.Play();
+        levelCompleteAudioSource.Play();
         yield return new WaitForSeconds(4f);
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
+    public IEnumerator PlaySora() 
+    {
+        waitPointIndex++;
+        arrow.CanMove = false;
+        suraAudioSource.clip = suraSFX[0];
+        suraSFX.RemoveAt(0);
+        suraAudioSource.Play();
+        yield return new WaitForSeconds(suraAudioSource.clip.length);
+        GameObject toDestroy = quranIconsCreated[0];
+        Destroy(toDestroy);
+        quranIconsCreated.RemoveAt(0);
+        arrow.CanMove = true;
+    }
+
     #region Find Red Pixels in SpriteRenderer - Not Used
+
+    [HideInInspector] public Vector2 WorldUnitsInCamera;
+    [HideInInspector] public Vector2 WorldToPixelAmount;
+    
     Vector2 FindRedPixelPosition()
     {
         // Get the texture from the sprite

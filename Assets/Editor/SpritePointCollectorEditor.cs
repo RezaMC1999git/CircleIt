@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEditor;
 using static SpritePointCollector;
 using System.Collections.Generic;
+using System;
 
 [CustomEditor(typeof(SpritePointCollector))]
 public class SpritePointCollectorEditor : Editor
@@ -9,14 +10,14 @@ public class SpritePointCollectorEditor : Editor
     private void OnSceneGUI()
     {
         SpritePointCollector collector = (SpritePointCollector)target;
-
+        bool addingPoint = collector.AddOrRemove();
         // Detect mouse clicks in the Scene view
         if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
         {
             Ray ray = HandleUtility.GUIPointToWorldRay(Event.current.mousePosition);
             RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction);
 
-            if (!collector.removeCheckPointsEnabled) // Add A Point
+            if (addingPoint) // Add A Point
             {
                 if (hit.collider != null && hit.collider.gameObject == collector.gameObject)
                 {
@@ -35,17 +36,37 @@ public class SpritePointCollectorEditor : Editor
 
                 if (hit.collider != null && hit.collider.gameObject == collector.gameObject) 
                 {
-                    // Find the point closest to the click
-                    for (int i = collector.checkPointClicks.Count - 1; i >= 0; i--)
+                    switch (collector.pointType)
                     {
-                        if (Vector3.Distance(collector.checkPointClicks[i], hit.point) < threshold)
-                        {
-                            collector.lastPointremovedIndex = i;
-                            collector.checkPointClicks.RemoveAt(i); // Remove point from list
-                            //Debug.Log("Point removed!");
+                        case (int)pointNames.checkPoint:
+                            // Find the point closest to the click
+                            for (int i = collector.checkPointClicks.Count - 1; i >= 0; i--)
+                            {
+                                if (Vector3.Distance(collector.checkPointClicks[i], hit.point) < threshold)
+                                {
+                                    collector.RemovePosition(i);
+                                    //Debug.Log("Point removed!");
+                                    break;
+                                }
+                            }
                             break;
-                        }
+
+                        case (int)pointNames.waitPoint:
+                            // Find the point closest to the click
+                            for (int i = collector.waitPointClicks.Count - 1; i >= 0; i--)
+                            {
+                                if (Vector3.Distance(collector.waitPointClicks[i], hit.point) < threshold)
+                                {
+                                    collector.RemovePosition(i);
+                                    //Debug.Log("Point removed!");
+                                    break;
+                                }
+                            }
+                            break;
+                        default:
+                            break;
                     }
+
                 }
                 // Mark scene as dirty to update changes
                 EditorUtility.SetDirty(collector);
@@ -59,19 +80,21 @@ public class SpritePointCollectorEditor : Editor
 
         SpritePointCollector collector = (SpritePointCollector)target;
 
+        #region Start Position Button
         GUI.backgroundColor = Color.green;
         if (GUILayout.Button("Choose Start Position", GUILayout.Width(400), GUILayout.Height(40)))
         {
             Debug.Log(" Start Point Saved ");
-            collector.pointIndex = (int)pointNames.start;
+            collector.pointType = (int)pointNames.start;
             collector.levelManager.startPosition = collector.startPosition;
         }
-
+        #endregion
+        #region CheckPoints Position Button
         GUI.backgroundColor = Color.yellow;
         if (GUILayout.Button("Choose CheckPoints", GUILayout.Width(400), GUILayout.Height(40)))
         {
             Debug.Log(" Choose Arrow Path ");
-            collector.pointIndex = (int)pointNames.checkPoint;
+            collector.pointType = (int)pointNames.checkPoint;
         }
 
         if (GUILayout.Button("Remove All CheckPoints", GUILayout.Width(400), GUILayout.Height(40)))
@@ -100,13 +123,50 @@ public class SpritePointCollectorEditor : Editor
             collector.levelManager.checkPoints = collector.checkPointClicks;
             Debug.Log(" CheckPoints Data Saved In LevelManager");
         }
-        
+        #endregion
+        #region waitPoints Position Button
+        GUI.backgroundColor = Color.magenta;
+        if (GUILayout.Button("Choose WaitPoints", GUILayout.Width(400), GUILayout.Height(40)))
+        {
+            Debug.Log(" Choose Suras Path ");
+            collector.pointType = (int)pointNames.waitPoint;
+        }
+
+        if (GUILayout.Button("Remove All WaitPoints", GUILayout.Width(400), GUILayout.Height(40)))
+        {
+            Debug.Log(" Suras Path Removed ");
+            collector.waitPointClicks = new List<Vector3>();
+        }
+
+        string suraButtonText = collector.removeWaitPointsEnabled ? "Removing A Point" : "Adding A Point";
+        GUI.backgroundColor = collector.removeWaitPointsEnabled ? Color.black : Color.magenta;
+        if (GUILayout.Button(suraButtonText, GUILayout.Width(400), GUILayout.Height(40)))
+        {
+            collector.removeWaitPointsEnabled = !collector.removeWaitPointsEnabled;
+        }
+
+        GUI.backgroundColor = Color.magenta;
+        if (GUILayout.Button("Subtract WaitPoints", GUILayout.Width(400), GUILayout.Height(40)))
+        {
+            if (collector.waitPointClicks.Count != 0)
+                collector.waitPointClicks.RemoveAt(collector.waitPointClicks.Count - 1);
+            Debug.Log(" WaitPoint Subtracted ");
+        }
+
+        if (GUILayout.Button("Save WaitPoints", GUILayout.Width(400), GUILayout.Height(40)))
+        {
+            collector.levelManager.waitPoints = collector.waitPointClicks;
+            Debug.Log(" WaitPoints Data Saved In LevelManager");
+        }
+        #endregion
+        #region End Position Button
         GUI.backgroundColor = Color.red;
         if (GUILayout.Button("Choose End Position", GUILayout.Width(400), GUILayout.Height(40)))
         {
-            collector.pointIndex = (int)pointNames.end;
+            collector.pointType = (int)pointNames.end;
             collector.levelManager.endPosition = collector.endPosition;
             Debug.Log(" End Point Saved ");
         }
+        #endregion
     }
 }

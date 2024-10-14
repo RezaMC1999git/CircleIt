@@ -35,6 +35,7 @@ public class Arrow : MonoBehaviour
         {
             ChangeArrowPosition();
             RotateArrow();
+            ReadSura();
         }
 
         // Stops Dragging
@@ -92,5 +93,16 @@ public class Arrow : MonoBehaviour
         float currentAngle = transform.rotation.eulerAngles.z;
         float Lastangle = Mathf.LerpAngle(currentAngle, targetAngle, rotationSpeed * Time.deltaTime);
         transform.eulerAngles = new Vector3(0, 0, Lastangle);
+    }
+
+    void ReadSura() 
+    {
+        if (levelManager.waitPointIndex >= levelManager.waitPoints.Count)
+            return;
+        // Check if we reached next waitPoint
+        if (Vector3.Distance(transform.position, levelManager.waitPoints[levelManager.waitPointIndex]) <= 0.5f)
+        {
+            StartCoroutine(levelManager.PlaySora());
+        }
     }
 }
