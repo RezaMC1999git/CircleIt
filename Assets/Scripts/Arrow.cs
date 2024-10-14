@@ -20,6 +20,7 @@ public class Arrow : MonoBehaviour
     {
         touchPosition = levelManager.checkPoints[0];
         CanMove = true;
+        RotateArrow(); // at first arrow rotation should be toward first checkPoint
     }
 
     private void Update()
@@ -56,11 +57,11 @@ public class Arrow : MonoBehaviour
 
         foreach (RaycastHit2D hit in hits)
         {
-            if (hit.collider.CompareTag("Player"))
+            if (hit.collider.CompareTag("Shape"))
             {
                 foundFirstTag = true;
             }
-            else if (hit.collider.CompareTag("Finish"))
+            else if (hit.collider.CompareTag("Forward"))
             {
                 foundSecondTag = true;
             }
@@ -68,6 +69,7 @@ public class Arrow : MonoBehaviour
             {
                 if (!sfxPlayer.isPlaying)
                     sfxPlayer.Play();
+                Vector3 test = new Vector3(hit.point.x, hit.point.y + 0.25f, 0);
                 transform.position = hit.point;
                 levelManager.lineRenderer.DrawLineOfMasks(Camera.main.ScreenToWorldPoint(Input.mousePosition));
                 levelManager.lineRenderer.CheckIfFinished(transform.position);

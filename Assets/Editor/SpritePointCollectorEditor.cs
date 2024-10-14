@@ -82,11 +82,18 @@ public class SpritePointCollectorEditor : Editor
 
         #region Start Position Button
         GUI.backgroundColor = Color.green;
-        if (GUILayout.Button("Choose Start Position", GUILayout.Width(400), GUILayout.Height(40)))
+        string startButtonText = collector.startPositionToggle ? "Tap Again To Save" : "Choose Start Position";
+        if (GUILayout.Button(startButtonText, GUILayout.Width(400), GUILayout.Height(40)))
         {
-            Debug.Log(" Start Point Saved ");
             collector.pointType = (int)pointNames.start;
-            collector.levelManager.startPosition = collector.startPosition;
+            collector.startPositionToggle = !collector.startPositionToggle;
+            collector.endPositionToggle = false;
+
+            if (!collector.startPositionToggle) 
+            {
+                Debug.Log(" Start Point Saved ");
+                collector.levelManager.startPosition = collector.startPosition;
+            }
         }
         #endregion
         #region CheckPoints Position Button
@@ -103,9 +110,9 @@ public class SpritePointCollectorEditor : Editor
             collector.checkPointClicks = new List<Vector3>();
         }
         
-        string buttonText = collector.removeCheckPointsEnabled ? "Removing A Point" : "Adding A Point";
+        string checkPointButtonText = collector.removeCheckPointsEnabled ? "Removing A Point" : "Adding A Point";
         GUI.backgroundColor = collector.removeCheckPointsEnabled ? Color.black : Color.yellow;
-        if (GUILayout.Button(buttonText, GUILayout.Width(400), GUILayout.Height(40)))
+        if (GUILayout.Button(checkPointButtonText, GUILayout.Width(400), GUILayout.Height(40)))
         {
             collector.removeCheckPointsEnabled = !collector.removeCheckPointsEnabled;
         }
@@ -161,11 +168,28 @@ public class SpritePointCollectorEditor : Editor
         #endregion
         #region End Position Button
         GUI.backgroundColor = Color.red;
-        if (GUILayout.Button("Choose End Position", GUILayout.Width(400), GUILayout.Height(40)))
+        string endButtonText = collector.endPositionToggle ? "Tap Again To Save" : "Choose End Position";
+        if (GUILayout.Button(endButtonText, GUILayout.Width(400), GUILayout.Height(40)))
         {
             collector.pointType = (int)pointNames.end;
-            collector.levelManager.endPosition = collector.endPosition;
-            Debug.Log(" End Point Saved ");
+            collector.endPositionToggle = !collector.endPositionToggle;
+            collector.startPositionToggle = false;
+
+            if (!collector.endPositionToggle) 
+            {
+                collector.levelManager.endPosition = collector.endPosition;
+                Debug.Log(" End Point Saved ");
+            }
+        }
+        #endregion
+        #region Disable Editor Button
+        GUI.backgroundColor = Color.black;
+        if (GUILayout.Button("Disable Editor Button", GUILayout.Width(400), GUILayout.Height(40)))
+        {
+            collector.pointType = -1;
+            collector.endPositionToggle = false;
+            collector.startPositionToggle = false;
+            Debug.Log(" Editor Disabled ");
         }
         #endregion
     }

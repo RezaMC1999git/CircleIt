@@ -9,7 +9,7 @@ public class SpritePointCollector : MonoBehaviour
     public Vector3 startPosition, endPosition;
     public List<Vector3> checkPointClicks = new List<Vector3>();
     public List<Vector3> waitPointClicks = new List<Vector3>();
-    [HideInInspector] public bool removeCheckPointsEnabled, removeWaitPointsEnabled;
+    [HideInInspector] public bool startPositionToggle, endPositionToggle, removeCheckPointsEnabled, removeWaitPointsEnabled;
     [HideInInspector] public int pointType, lastCheckPointremovedIndex = -1, lastWaitPointremovedIndex = -1;
 
     // Optional: Draw gizmos to visualize stored points
