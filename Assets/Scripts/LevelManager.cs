@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -19,7 +20,7 @@ public class LevelManager : MonoBehaviour
     public GameObject quranIcon;
     [SerializeField] List<GameObject> quranIconsCreated;
     public Transform quranIconsParent;
-    [Range(50,200)]
+    [Range(50,500)]
     public int amountOfMasksToPool;
     public List<Vector3> checkPoints, waitPoints;
     public int checkPointIndex, waitPointIndex;
@@ -36,6 +37,9 @@ public class LevelManager : MonoBehaviour
     [SerializeField] AudioSource levelCompleteAudioSource;
     [SerializeField] AudioSource suraAudioSource;
     [SerializeField] List<AudioClip> suraSFX;
+
+    [SerializeField] Queue<AudioClip> fetchedSuras;
+    Coroutine suraCoroutine;
 
     private void Awake()
     {
@@ -59,6 +63,7 @@ public class LevelManager : MonoBehaviour
             quranIconsCreated.Add(newQuranPrefab);
         }
         arrow.gameObject.transform.position = startPosition;
+        fetchedSuras = new Queue<AudioClip>();
     }
 
     private void Update()
@@ -108,21 +113,31 @@ public class LevelManager : MonoBehaviour
         arrow.sfxPlayer.Stop();
         levelCompleteAudioSource.Play();
         yield return new WaitForSeconds(4f);
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
-    public IEnumerator PlaySora() 
+    public void PlaySura() 
     {
         waitPointIndex++;
-        //arrow.CanMove = false;
-        suraAudioSource.clip = suraSFX[0];
-        suraSFX.RemoveAt(0);
+        fetchedSuras.Enqueue(suraSFX[0]);
+        if (suraCoroutine == null) 
+        {
+            suraCoroutine = StartCoroutine(PlaySuraIE());
+        }
+    }
+
+    public IEnumerator PlaySuraIE() 
+    {
+        suraAudioSource.clip = fetchedSuras.Dequeue();
         suraAudioSource.Play();
         yield return new WaitForSeconds(suraAudioSource.clip.length);
         GameObject toDestroy = quranIconsCreated[0];
         Destroy(toDestroy);
         quranIconsCreated.RemoveAt(0);
-        arrow.CanMove = true;
+        if (fetchedSuras.Count != 0)
+            suraCoroutine = StartCoroutine(PlaySuraIE());
+        else
+            suraCoroutine = null;
     }
 
     #region Find Red Pixels in SpriteRenderer - Not Used

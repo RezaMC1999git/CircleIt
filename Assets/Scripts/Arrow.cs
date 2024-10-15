@@ -4,7 +4,7 @@ using UnityEngine;
 public class Arrow : MonoBehaviour
 {
     // Summary : Controlls All Arrow Actions
-    
+
     [Header("UI")]
     public Animator arrowAnimator;
     [HideInInspector] public bool CanMove;
@@ -12,6 +12,7 @@ public class Arrow : MonoBehaviour
     [Range(5, 10)]
     [SerializeField] float rotationSpeed = 5f;
     Vector3 touchPosition, nextPosition;
+    [SerializeField] GameObject arrowShapeChild;
 
     [Space]
     [Header("Classes")]
@@ -20,7 +21,7 @@ public class Arrow : MonoBehaviour
     private void Start()
     {
         touchPosition = levelManager.checkPoints[0];
-        nextPosition = levelManager.startPosition; 
+        nextPosition = levelManager.startPosition;
         CanMove = true;
         RotateArrow(); // at first arrow rotation should be toward first checkPoint
     }
@@ -42,10 +43,12 @@ public class Arrow : MonoBehaviour
         }
 
         // Stops Dragging
-        if (Input.GetMouseButtonUp(0)) 
+        if (Input.GetMouseButtonUp(0))
         {
             if (sfxPlayer.isPlaying)
                 sfxPlayer.Stop();
+            if (arrowShapeChild.transform.localPosition.x != 0)
+                arrowShapeChild.transform.localPosition = new Vector3(0f, 0f, 0f);
         }
     }
 
@@ -71,8 +74,11 @@ public class Arrow : MonoBehaviour
             {
                 if (!sfxPlayer.isPlaying)
                     sfxPlayer.Play();
-                Vector3 test = new Vector3(hit.point.x, hit.point.y + 0.25f, 0);
+                Vector3 phonePosition = new Vector3(hit.point.x, hit.point.y + 0.5f, 0);
                 nextPosition = hit.point;
+#if UNITY_ANDROID
+                arrowShapeChild.transform.position = phonePosition;
+#endif
                 transform.position = nextPosition;
                 levelManager.lineRenderer.DrawLineOfMasks(Camera.main.ScreenToWorldPoint(Input.mousePosition));
                 levelManager.lineRenderer.CheckIfFinished(transform.position);
@@ -80,7 +86,7 @@ public class Arrow : MonoBehaviour
         }
     }
 
-    void RotateArrow() 
+    void RotateArrow()
     {
         // Check if we reached next checkPoint
         if (Vector3.Distance(transform.position, levelManager.checkPoints[levelManager.checkPointIndex]) <= 0.6f)
@@ -102,14 +108,14 @@ public class Arrow : MonoBehaviour
         transform.eulerAngles = new Vector3(0, 0, Lastangle);
     }
 
-    void ReadSura() 
+    void ReadSura()
     {
         if (levelManager.waitPointIndex >= levelManager.waitPoints.Count)
             return;
         // Check if we reached next waitPoint
         if (Vector3.Distance(transform.position, levelManager.waitPoints[levelManager.waitPointIndex]) <= 0.5f)
         {
-            StartCoroutine(levelManager.PlaySora());
+            levelManager.PlaySura();
         }
     }
 }

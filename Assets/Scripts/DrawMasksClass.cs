@@ -18,6 +18,7 @@ public class DrawMasksClass : MonoBehaviour
     [Header("Classes")]
     public LevelManager levelManager;
 
+    int allMasksIndex = 0;
     private void Start()
     {
         previousPosition = transform.position;
@@ -40,9 +41,13 @@ public class DrawMasksClass : MonoBehaviour
                     currentPosition.z = 0;
                     newMask.transform.position = currentPosition;
                     newMask.SetActive(true);
-                    if(allMasks.Count > 1 && levelManager.checkPointIndex > 3)
-                        allMasks[allMasks.Count-1].transform.position = levelManager.checkPoints[levelManager.checkPointIndex - 3];
                     allMasks.Add(newMask);
+                    if (allMasks.Count > 1 && levelManager.checkPointIndex > 3)
+                    {
+                        allMasks[allMasksIndex].transform.position = levelManager.checkPoints[levelManager.checkPointIndex - 4];
+                        allMasksIndex++;
+                    }
+
                 }
             }
             previousPosition = currentPosition;
@@ -53,8 +58,8 @@ public class DrawMasksClass : MonoBehaviour
     {
         if (!MaskObjectPool.instance)
             return;
-        // reached endPoint and doesn't reach it backward ! ( at least touched one of checkPoints )
-        if (Vector2.Distance(currentPosition, levelManager.endPosition) <= 0.25f && levelManager.checkPointIndex >= 1f)
+        // reached endPoint and doesn't reach it backward ! ( at last Missed Five of checkPoints )
+        if (Vector2.Distance(currentPosition, levelManager.endPosition) <= 0.75f && levelManager.checkPointIndex >= levelManager.checkPoints.Count - 5)
         {
             StartCoroutine(levelManager.FinishGame());
             Destroy(MaskObjectPool.instance.gameObject);

@@ -12,6 +12,6 @@ public class MainMenuController : MonoBehaviour
 
     public void LoadScene() 
     {
-        SceneManager.LoadScene("Level 1");        
+        SceneManager.LoadScene("Level 2");        
     }
 }
