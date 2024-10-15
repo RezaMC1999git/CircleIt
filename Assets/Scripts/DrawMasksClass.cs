@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class DrawMasksClass : MonoBehaviour
@@ -11,6 +12,7 @@ public class DrawMasksClass : MonoBehaviour
     [Range(0.1f, 1)]
     [SerializeField] float minDistanceBetweenLines = 0.1f;
     Vector3 previousPosition;
+    [SerializeField] List<GameObject> allMasks;
 
     [Space]
     [Header("Classes")]
@@ -19,10 +21,13 @@ public class DrawMasksClass : MonoBehaviour
     private void Start()
     {
         previousPosition = transform.position;
+        allMasks = new List<GameObject>();
     }
 
     public void DrawLineOfMasks(Vector3 currentPosition)
     {
+        if (!MaskObjectPool.instance)
+            return;
         if (Vector2.Distance(currentPosition, previousPosition) > minDistanceBetweenLines)
         {
             if (previousPosition != transform.position)
@@ -35,6 +40,9 @@ public class DrawMasksClass : MonoBehaviour
                     currentPosition.z = 0;
                     newMask.transform.position = currentPosition;
                     newMask.SetActive(true);
+                    if(allMasks.Count > 1 && levelManager.checkPointIndex > 3)
+                        allMasks[allMasks.Count-1].transform.position = levelManager.checkPoints[levelManager.checkPointIndex - 3];
+                    allMasks.Add(newMask);
                 }
             }
             previousPosition = currentPosition;
@@ -43,8 +51,10 @@ public class DrawMasksClass : MonoBehaviour
 
     public void CheckIfFinished(Vector3 currentPosition)
     {
+        if (!MaskObjectPool.instance)
+            return;
         // reached endPoint and doesn't reach it backward ! ( at least touched one of checkPoints )
-        if (Vector2.Distance(currentPosition, levelManager.endPosition) <= 0.25f && levelManager.checkPointIndex >= 1)
+        if (Vector2.Distance(currentPosition, levelManager.endPosition) <= 0.25f && levelManager.checkPointIndex >= 1f)
         {
             StartCoroutine(levelManager.FinishGame());
             Destroy(MaskObjectPool.instance.gameObject);

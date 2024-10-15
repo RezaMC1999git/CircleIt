@@ -114,7 +114,7 @@ public class LevelManager : MonoBehaviour
     public IEnumerator PlaySora() 
     {
         waitPointIndex++;
-        arrow.CanMove = false;
+        //arrow.CanMove = false;
         suraAudioSource.clip = suraSFX[0];
         suraSFX.RemoveAt(0);
         suraAudioSource.Play();

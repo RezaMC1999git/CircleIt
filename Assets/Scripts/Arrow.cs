@@ -1,3 +1,4 @@
+using Unity.Burst.CompilerServices;
 using UnityEngine;
 
 public class Arrow : MonoBehaviour
@@ -10,7 +11,7 @@ public class Arrow : MonoBehaviour
     public AudioSource sfxPlayer;
     [Range(5, 10)]
     [SerializeField] float rotationSpeed = 5f;
-    Vector3 touchPosition;
+    Vector3 touchPosition, nextPosition;
 
     [Space]
     [Header("Classes")]
@@ -19,6 +20,7 @@ public class Arrow : MonoBehaviour
     private void Start()
     {
         touchPosition = levelManager.checkPoints[0];
+        nextPosition = levelManager.startPosition; 
         CanMove = true;
         RotateArrow(); // at first arrow rotation should be toward first checkPoint
     }
@@ -70,7 +72,8 @@ public class Arrow : MonoBehaviour
                 if (!sfxPlayer.isPlaying)
                     sfxPlayer.Play();
                 Vector3 test = new Vector3(hit.point.x, hit.point.y + 0.25f, 0);
-                transform.position = hit.point;
+                nextPosition = hit.point;
+                transform.position = nextPosition;
                 levelManager.lineRenderer.DrawLineOfMasks(Camera.main.ScreenToWorldPoint(Input.mousePosition));
                 levelManager.lineRenderer.CheckIfFinished(transform.position);
             }
@@ -80,11 +83,13 @@ public class Arrow : MonoBehaviour
     void RotateArrow() 
     {
         // Check if we reached next checkPoint
-        if (Vector3.Distance(transform.position, levelManager.checkPoints[levelManager.checkPointIndex]) <= 0.5f)
+        if (Vector3.Distance(transform.position, levelManager.checkPoints[levelManager.checkPointIndex]) <= 0.6f)
         {
             if ((levelManager.checkPointIndex + 1) < levelManager.checkPoints.Count)
             {
+
                 levelManager.checkPointIndex++;
+                //levelManager.lineRenderer.DrawLineOfMasks(Camera.main.ScreenToWorldPoint(Input.mousePosition));
                 touchPosition = levelManager.checkPoints[levelManager.checkPointIndex];
             }
         }
