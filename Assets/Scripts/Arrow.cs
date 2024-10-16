@@ -1,3 +1,4 @@
+using System.Collections;
 using Unity.Burst.CompilerServices;
 using UnityEngine;
 
@@ -11,8 +12,12 @@ public class Arrow : MonoBehaviour
     public AudioSource sfxPlayer;
     [Range(5, 10)]
     [SerializeField] float rotationSpeed = 5f;
+    [Range(2, 10)]
+    [SerializeField] float firstAnimationSpeed = 2f;
     Vector3 touchPosition, nextPosition;
-    [SerializeField] GameObject arrowShapeChild;
+    public Quaternion firstRotation;
+    [SerializeField] GameObject arrowShapeChild, guideHand;
+    bool showTutorial;
 
     [Space]
     [Header("Classes")]
@@ -20,14 +25,26 @@ public class Arrow : MonoBehaviour
 
     private void Start()
     {
+        StartCoroutine(ShowTutorialIE());
+    }
+
+    IEnumerator ShowTutorialIE()
+    {
+        // First Initial Arrow Then Play Hand Animation Then Follow The Path
+        guideHand.transform.position = new Vector3(transform.position.x, transform.position.y - 0.5f, transform.position.z);
         touchPosition = levelManager.checkPoints[0];
         nextPosition = levelManager.startPosition;
+        transform.rotation = firstRotation;
         CanMove = true;
-        RotateArrow(); // at first arrow rotation should be toward first checkPoint
+        yield return new WaitForSeconds(1f);
+        showTutorial = true;
     }
 
     private void Update()
     {
+        if (showTutorial)
+            Tutorial();
+
         // Arrow Starts To Move
         if (Input.GetMouseButtonDown(0))
         {
@@ -52,6 +69,29 @@ public class Arrow : MonoBehaviour
         }
     }
 
+    void Tutorial()
+    {
+        if (!levelManager.levelStarted)
+        {
+            guideHand.transform.position = new Vector3(transform.position.x, transform.position.y - 0.5f, transform.position.z);
+            RotateArrow();
+            if (levelManager.checkPointIndex >= levelManager.checkPoints.Count - 1)
+            {
+                showTutorial = false;
+                levelManager.StartGame();
+                return;
+            }
+            transform.position = Vector2.MoveTowards(transform.position, levelManager.checkPoints[levelManager.checkPointIndex], firstAnimationSpeed * Time.deltaTime);
+        }
+    }
+
+    public void ResetArrow()
+    {
+        guideHand.SetActive(false);
+        transform.position = levelManager.startPosition;
+        transform.rotation = firstRotation;
+    }
+
     void ChangeArrowPosition()
     {
         Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -74,14 +114,13 @@ public class Arrow : MonoBehaviour
             {
                 if (!sfxPlayer.isPlaying)
                     sfxPlayer.Play();
-                Vector3 phonePosition = new Vector3(hit.point.x, hit.point.y + 0.5f, 0);
+                Vector3 phonePosition = new Vector3(hit.point.x, hit.point.y + 0.75f, 0);
                 nextPosition = hit.point;
 #if UNITY_ANDROID
                 arrowShapeChild.transform.position = phonePosition;
 #endif
                 transform.position = nextPosition;
-                levelManager.lineRenderer.DrawLineOfMasks(Camera.main.ScreenToWorldPoint(Input.mousePosition));
-                levelManager.lineRenderer.CheckIfFinished(transform.position);
+                CheckIfFinished(transform.position);
             }
         }
     }
@@ -89,13 +128,19 @@ public class Arrow : MonoBehaviour
     void RotateArrow()
     {
         // Check if we reached next checkPoint
-        if (Vector3.Distance(transform.position, levelManager.checkPoints[levelManager.checkPointIndex]) <= 0.6f)
+        if (Vector3.Distance(transform.position, levelManager.checkPoints[levelManager.checkPointIndex]) <= 0.35f)
         {
             if ((levelManager.checkPointIndex + 1) < levelManager.checkPoints.Count)
             {
 
+                GameObject newMask = MaskObjectPool.instance.getMaskPooledObject();
+
+                if (newMask != null)
+                {
+                    newMask.transform.rotation = levelManager.arrow.transform.rotation;
+                    newMask.SetActive(true);
+                }
                 levelManager.checkPointIndex++;
-                //levelManager.lineRenderer.DrawLineOfMasks(Camera.main.ScreenToWorldPoint(Input.mousePosition));
                 touchPosition = levelManager.checkPoints[levelManager.checkPointIndex];
             }
         }
@@ -113,9 +158,21 @@ public class Arrow : MonoBehaviour
         if (levelManager.waitPointIndex >= levelManager.waitPoints.Count)
             return;
         // Check if we reached next waitPoint
-        if (Vector3.Distance(transform.position, levelManager.waitPoints[levelManager.waitPointIndex]) <= 0.5f)
+        if (Vector3.Distance(transform.position, levelManager.waitPoints[levelManager.waitPointIndex]) <= 0.6f)
         {
             levelManager.PlaySura();
+        }
+    }
+
+    public void CheckIfFinished(Vector3 currentPosition)
+    {
+        if (!MaskObjectPool.instance)
+            return;
+        // reached endPoint and doesn't reach it backward ! ( at last Missed Five of checkPoints )
+        if (Vector2.Distance(currentPosition, levelManager.endPosition) <= 0.75f && levelManager.checkPointIndex >= levelManager.checkPoints.Count - 5)
+        {
+            StartCoroutine(levelManager.FinishGame());
+            Destroy(MaskObjectPool.instance.gameObject);
         }
     }
 }

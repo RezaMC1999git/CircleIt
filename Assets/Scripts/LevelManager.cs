@@ -15,22 +15,20 @@ public class LevelManager : MonoBehaviour
     public Vector3 startPosition;
     public Vector3 endPosition;
     public SpriteRenderer levelShapeBase ,levelShapeDotted, levelShapeTouch;
-    public Animator shapeCompleteAnimator, shapesAnimator;
-    [SerializeField] GameObject  clickCirclePrefab, fakeArrowGO, fakeMasksGO;
+    public Animator shapeCompleteAnimator;
+    [SerializeField] GameObject  clickCirclePrefab;
     public GameObject quranIcon;
     [SerializeField] List<GameObject> quranIconsCreated;
     public Transform quranIconsParent;
-    [Range(50,500)]
-    public int amountOfMasksToPool;
     public List<Vector3> checkPoints, waitPoints;
-    public int checkPointIndex, waitPointIndex;
+    public int checkPointIndex, waitPointIndex, checkTest;
     [HideInInspector] public bool levelStarted, levelFinished;
     public SpriteRenderer test;
 
     [Space]
     [Header("Classes")]
     public Arrow arrow;
-    public DrawMasksClass lineRenderer;
+    public MasksManager masksManager;
     
     [Space]
     [Header("SFX")]
@@ -89,17 +87,16 @@ public class LevelManager : MonoBehaviour
     public void StartGame() 
     {
         // Make All Shapes Full Color If Skipped Intro Animation
+        checkPointIndex = 0;
+        levelStarted = true;
         Color fullAlphaColor = new Color(1f, 1f, 1f,1f);
         levelShapeBase.color = new Color(levelShapeBase.color.r, levelShapeBase.color.g, levelShapeBase.color.b, fullAlphaColor.a);
         levelShapeDotted.color = new Color(levelShapeDotted.color.r, levelShapeDotted.color.g, levelShapeDotted.color.b, fullAlphaColor.a);
         levelShapeTouch.color = new Color(levelShapeTouch.color.r, levelShapeTouch.color.g, levelShapeTouch.color.b, fullAlphaColor.a);
 
         levelShapeTouch.gameObject.SetActive(true);
-        fakeMasksGO.SetActive(false);
-        fakeArrowGO.SetActive(false);
-        shapesAnimator.enabled = false;
-        arrow.gameObject.SetActive(true);
-        lineRenderer.gameObject.SetActive(true);
+        masksManager.ResetMasks();
+        arrow.ResetArrow();
     }
 
     public IEnumerator FinishGame()
@@ -113,7 +110,7 @@ public class LevelManager : MonoBehaviour
         arrow.sfxPlayer.Stop();
         levelCompleteAudioSource.Play();
         yield return new WaitForSeconds(4f);
-        //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     public void PlaySura() 

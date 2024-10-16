@@ -128,6 +128,8 @@ public class SpritePointCollectorEditor : Editor
         if (GUILayout.Button("Save CheckPoints", GUILayout.Width(400), GUILayout.Height(40)))
         {
             collector.levelManager.checkPoints = collector.checkPointClicks;
+            Vector3 position = collector.levelManager.checkPoints[1] - collector.levelManager.checkPoints[0];
+            collector.levelManager.arrow.firstRotation.z = Mathf.Atan2(position.y, position.x) * Mathf.Rad2Deg;
             Debug.Log(" CheckPoints Data Saved In LevelManager");
         }
         #endregion

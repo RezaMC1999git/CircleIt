@@ -29,11 +29,13 @@ public class MaskObjectPool : MonoBehaviour
 
     private void PoolMasks()
     {
-        for (int i = 0; i < levelManager.amountOfMasksToPool; i++)
+        for (int i = 0; i < levelManager.checkPoints.Count; i++)
         {
             GameObject newMask = Instantiate(maskPrefab, this.transform);
             newMask.transform.SetParent(this.transform);
+            newMask.transform.position = levelManager.checkPoints[i];
             newMask.SetActive(false);
+            newMask.name = "mask" + i;
             pooledObjects.Add(newMask);
         }
     }

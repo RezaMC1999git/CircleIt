@@ -168,7 +168,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startPosition: {x: -6, y: -2, z: 0}
-  finishPosition: {x: -5.5, y: -1.6, z: 0}
+  endPosition: {x: 0, y: 0, z: 0}
   levelShapeBase: {fileID: 1911804859}
   levelShapeDotted: {fileID: 1528814499}
   levelShapeTouch: {fileID: 1946462953}
@@ -177,6 +177,9 @@ MonoBehaviour:
   clickCirclePrefab: {fileID: 3995542093523587042, guid: 3895ea6b9938d7b4aa604b111c70e0bc, type: 3}
   fakeArrowGO: {fileID: 157682487}
   fakeMasksGO: {fileID: 933576914}
+  quranIcon: {fileID: 5748500247874134624, guid: 286ae1ca4a02dc4488f91e958b9928d5, type: 3}
+  quranIconsCreated: []
+  quranIconsParent: {fileID: 0}
   amountOfMasksToPool: 80
   checkPoints:
   - {x: -5.03, y: -3.57, z: 0}
@@ -186,12 +189,19 @@ MonoBehaviour:
   - {x: 1.15, y: 3.31, z: 0}
   - {x: -1.13, y: 3.78, z: 0}
   - {x: -5.6, y: -1.73, z: 0}
+  waitPoints: []
   checkPointIndex: 0
+  waitPointIndex: 0
   levelStarted: 0
   levelFinished: 0
+  test: {fileID: 0}
   arrow: {fileID: 2055906910}
   lineRenderer: {fileID: 793870989}
-  levelCompleteSFX: {fileID: 813585616}
+  levelCompleteAudioSource: {fileID: 0}
+  suraAudioSource: {fileID: 0}
+  suraSFX: []
+  WorldUnitsInCamera: {x: 0, y: 0}
+  WorldToPixelAmount: {x: 0, y: 0}
 --- !u!1 &157682487
 GameObject:
   m_ObjectHideFlags: 0
@@ -822,6 +832,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   minDistanceBetweenLines: 0.5
+  allMasks: []
   levelManager: {fileID: 51167869}
 --- !u!1 &813585614
 GameObject:
@@ -1157,9 +1168,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   levelManager: {fileID: 51167869}
-  worldVertices: []
-  spriteRenderer: {fileID: 1261431286}
-  arrowTest: {fileID: 2055906907}
 --- !u!1 &1261431285
 GameObject:
   m_ObjectHideFlags: 0
@@ -1907,6 +1915,7 @@ MonoBehaviour:
   CanMove: 0
   sfxPlayer: {fileID: 210564116}
   rotationSpeed: 5
+  arrowShapeChild: {fileID: 2055906907}
   levelManager: {fileID: 51167869}
 --- !u!4 &2055906912
 Transform:
