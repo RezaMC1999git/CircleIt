@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using Unity.Mathematics;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -14,22 +13,21 @@ public class LevelManager : MonoBehaviour
     [Header("UI")]
     public Vector3 startPosition;
     public Vector3 endPosition;
-    public SpriteRenderer levelShapeBase ,levelShapeDotted, levelShapeTouch;
+    public SpriteRenderer levelShapeBase, levelShapeDotted, levelShapeTouch;
     public Animator shapeCompleteAnimator;
-    [SerializeField] GameObject  clickCirclePrefab;
+    [SerializeField] GameObject clickCirclePrefab;
     public GameObject quranIcon;
-    [SerializeField] List<GameObject> quranIconsCreated;
+    List<GameObject> quranIconsCreated;
     public Transform quranIconsParent;
-    public List<Vector3> checkPoints, waitPoints;
-    public int checkPointIndex, waitPointIndex, checkTest;
+    [HideInInspector] public List<Vector3> checkPoints, waitPoints;
+    [HideInInspector] public int checkPointIndex, waitPointIndex, checkTest;
     [HideInInspector] public bool levelStarted, levelFinished;
-    public SpriteRenderer test;
 
     [Space]
     [Header("Classes")]
     public Arrow arrow;
     public MasksManager masksManager;
-    
+
     [Space]
     [Header("SFX")]
     [SerializeField] AudioSource levelCompleteAudioSource;
@@ -41,7 +39,7 @@ public class LevelManager : MonoBehaviour
 
     private void Awake()
     {
-        if(instance == null)
+        if (instance == null)
             instance = this;
     }
 
@@ -54,13 +52,13 @@ public class LevelManager : MonoBehaviour
         //WorldToPixelAmount.x = Screen.width / WorldUnitsInCamera.x;
         //WorldToPixelAmount.y = Screen.height / WorldUnitsInCamera.y;
         #endregion
+        quranIconsCreated = new List<GameObject>();
         for (int i = 0; i < waitPoints.Count; i++)
         {
             GameObject newQuranPrefab = Instantiate(quranIcon, quranIconsParent);
             newQuranPrefab.transform.position = waitPoints[i];
             quranIconsCreated.Add(newQuranPrefab);
         }
-        arrow.gameObject.transform.position = startPosition;
         fetchedSuras = new Queue<AudioClip>();
     }
 
@@ -84,19 +82,13 @@ public class LevelManager : MonoBehaviour
         Instantiate(clickCirclePrefab, new Vector3(worldPosition.x, worldPosition.y, 0), Quaternion.identity);
     }
 
-    public void StartGame() 
+    public void StartGame()
     {
-        // Make All Shapes Full Color If Skipped Intro Animation
         checkPointIndex = 0;
-        levelStarted = true;
-        Color fullAlphaColor = new Color(1f, 1f, 1f,1f);
-        levelShapeBase.color = new Color(levelShapeBase.color.r, levelShapeBase.color.g, levelShapeBase.color.b, fullAlphaColor.a);
-        levelShapeDotted.color = new Color(levelShapeDotted.color.r, levelShapeDotted.color.g, levelShapeDotted.color.b, fullAlphaColor.a);
-        levelShapeTouch.color = new Color(levelShapeTouch.color.r, levelShapeTouch.color.g, levelShapeTouch.color.b, fullAlphaColor.a);
-
         levelShapeTouch.gameObject.SetActive(true);
         masksManager.ResetMasks();
         arrow.ResetArrow();
+        levelStarted = true;
     }
 
     public IEnumerator FinishGame()
@@ -110,20 +102,32 @@ public class LevelManager : MonoBehaviour
         arrow.sfxPlayer.Stop();
         levelCompleteAudioSource.Play();
         yield return new WaitForSeconds(4f);
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+
+        string levelName = SceneManager.GetActiveScene().name;
+        Match match = Regex.Match(levelName, @"\d+"); // Find digits in the string
+        if (match.Success)
+        {
+            int number = int.Parse(match.Value);
+            if (number < 5)  // Load Next Level
+                SceneManager.LoadScene("Level " + (number + 1).ToString());
+            else // Back To Main Menu
+            {
+                SceneManager.LoadScene("Main Menu");
+            }
+        }
     }
 
-    public void PlaySura() 
+    public void PlaySura()
     {
         waitPointIndex++;
         fetchedSuras.Enqueue(suraSFX[0]);
-        if (suraCoroutine == null) 
+        if (suraCoroutine == null)
         {
             suraCoroutine = StartCoroutine(PlaySuraIE());
         }
     }
 
-    public IEnumerator PlaySuraIE() 
+    public IEnumerator PlaySuraIE()
     {
         suraAudioSource.clip = fetchedSuras.Dequeue();
         suraAudioSource.Play();
@@ -141,11 +145,12 @@ public class LevelManager : MonoBehaviour
 
     [HideInInspector] public Vector2 WorldUnitsInCamera;
     [HideInInspector] public Vector2 WorldToPixelAmount;
-    
+
     Vector2 FindRedPixelPosition()
     {
         // Get the texture from the sprite
-        Texture2D texture = test.sprite.texture;
+        //Texture2D texture = test.sprite.texture;
+        Texture2D texture = null;
 
         // Loop through pixels in the texture
         for (int x = 0; x < texture.width; x++)
@@ -165,7 +170,8 @@ public class LevelManager : MonoBehaviour
 
                     // Convert to world space
                     Debug.LogError("Lo:" + localPosition);
-                    Vector2 worldPosition = test.transform.TransformPoint(localPosition);
+                    //Vector2 worldPosition = test.transform.TransformPoint(localPosition);
+                    Vector2 worldPosition = new Vector2(0f, 0f);
                     return worldPosition;
                 }
             }

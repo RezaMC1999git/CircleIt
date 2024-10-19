@@ -1,5 +1,4 @@
 using System.Collections;
-using Unity.Burst.CompilerServices;
 using UnityEngine;
 
 public class Arrow : MonoBehaviour
@@ -31,10 +30,13 @@ public class Arrow : MonoBehaviour
     IEnumerator ShowTutorialIE()
     {
         // First Initial Arrow Then Play Hand Animation Then Follow The Path
+        transform.position = levelManager.startPosition;
         guideHand.transform.position = new Vector3(transform.position.x, transform.position.y - 0.5f, transform.position.z);
+        //nextPosition = levelManager.startPosition;
         touchPosition = levelManager.checkPoints[0];
-        nextPosition = levelManager.startPosition;
-        transform.rotation = firstRotation;
+        Vector3 position = touchPosition - transform.position;
+        float targetAngle = Mathf.Atan2(position.y, position.x) * Mathf.Rad2Deg;
+        transform.rotation = Quaternion.Euler(0f, 0f, targetAngle);
         CanMove = true;
         yield return new WaitForSeconds(1f);
         showTutorial = true;
@@ -55,7 +57,7 @@ public class Arrow : MonoBehaviour
         else if (Input.GetMouseButton(0) && CanMove)
         {
             ChangeArrowPosition();
-            RotateArrow();
+            FollowPath();
             ReadSura();
         }
 
@@ -74,7 +76,7 @@ public class Arrow : MonoBehaviour
         if (!levelManager.levelStarted)
         {
             guideHand.transform.position = new Vector3(transform.position.x, transform.position.y - 0.5f, transform.position.z);
-            RotateArrow();
+            FollowPath();
             if (levelManager.checkPointIndex >= levelManager.checkPoints.Count - 1)
             {
                 showTutorial = false;
@@ -89,9 +91,13 @@ public class Arrow : MonoBehaviour
     {
         guideHand.SetActive(false);
         transform.position = levelManager.startPosition;
-        transform.rotation = firstRotation;
+        touchPosition = levelManager.checkPoints[0];
+        Vector3 position = touchPosition - transform.position;
+        float targetAngle = Mathf.Atan2(position.y, position.x) * Mathf.Rad2Deg;
+        transform.rotation = Quaternion.Euler(0f, 0f, targetAngle);
     }
 
+    // If Touching Both Shape and Forward Collider, change arrow position
     void ChangeArrowPosition()
     {
         Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -125,7 +131,8 @@ public class Arrow : MonoBehaviour
         }
     }
 
-    void RotateArrow()
+    // Rotate Arrow and Create A Mask In The Path if Reached Next CheckPoint
+    void FollowPath()
     {
         // Check if we reached next checkPoint
         if (Vector3.Distance(transform.position, levelManager.checkPoints[levelManager.checkPointIndex]) <= 0.35f)

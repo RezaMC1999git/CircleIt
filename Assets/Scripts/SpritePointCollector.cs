@@ -1,18 +1,17 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System;
-using UnityEngine.UIElements;
 
 public class SpritePointCollector : MonoBehaviour
 {
+    // Summary : This Class is Used For Adding or Removing Shapes Points 
+
     public LevelManager levelManager;
     public Vector3 startPosition, endPosition;
     public List<Vector3> checkPointClicks = new List<Vector3>();
     public List<Vector3> waitPointClicks = new List<Vector3>();
     [HideInInspector] public bool startPositionToggle, endPositionToggle, removeCheckPointsEnabled, removeWaitPointsEnabled;
-    [HideInInspector] public int pointType, lastCheckPointremovedIndex = -1, lastWaitPointremovedIndex = -1;
+    [HideInInspector] public int pointType, lastCheckPointRemovedIndex = -1, lastWaitPointRemovedIndex = -1;
 
-    // Optional: Draw gizmos to visualize stored points
     public void AddPosition(Vector3 position)
     {
         switch (pointType)
@@ -22,10 +21,10 @@ public class SpritePointCollector : MonoBehaviour
                 break;
 
             case (int)pointNames.checkPoint:
-                if (lastCheckPointremovedIndex != -1) // means we removed one or more points in Editor mode
+                if (lastCheckPointRemovedIndex != -1) // means we removed one or more checkPoints in Editor mode
                 {
-                    checkPointClicks.Insert(lastCheckPointremovedIndex, position);
-                    lastCheckPointremovedIndex = -1;
+                    checkPointClicks.Insert(lastCheckPointRemovedIndex, position);
+                    lastCheckPointRemovedIndex = -1;
                 }
                 else
                 {
@@ -34,10 +33,10 @@ public class SpritePointCollector : MonoBehaviour
                 break;
 
             case (int)pointNames.waitPoint:
-                if (lastWaitPointremovedIndex != -1) // means we removed one or more points in Editor mode
+                if (lastWaitPointRemovedIndex != -1) // means we removed one or more waitPoints in Editor mode
                 {
-                    waitPointClicks.Insert(lastWaitPointremovedIndex, position);
-                    lastWaitPointremovedIndex = -1;
+                    waitPointClicks.Insert(lastWaitPointRemovedIndex, position);
+                    lastWaitPointRemovedIndex = -1;
                 }
                 else
                 {
@@ -59,12 +58,12 @@ public class SpritePointCollector : MonoBehaviour
         switch (pointType)
         {
             case (int)pointNames.checkPoint:
-                lastCheckPointremovedIndex = index;
+                lastCheckPointRemovedIndex = index;
                 checkPointClicks.RemoveAt(index); // Remove point from list
                 break;
 
             case (int)pointNames.waitPoint:
-                lastWaitPointremovedIndex = index;
+                lastWaitPointRemovedIndex = index;
                 waitPointClicks.RemoveAt(index); // Remove point from list
                 break;
         }

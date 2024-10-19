@@ -2,11 +2,12 @@ using UnityEngine;
 
 public class Scratch : MonoBehaviour
 {
-    // An Attempt to Attaching Mask to LineRenderer, which has Failed !
+    // Summary : An Attempt to Attaching Mask to LineRenderer, which has Failed !
+
     public SpriteMask mask;
     public Camera cam;
 
-    public void AssigCameraAsMask()
+    public void AssignCameraAsMask()
     {
         int height = Screen.height;
         int width = Screen.width;
