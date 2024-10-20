@@ -23,7 +23,8 @@ public class SpritePointCollector : MonoBehaviour
             case (int)pointNames.checkPoint:
                 if (lastCheckPointRemovedIndex != -1) // means we removed one or more checkPoints in Editor mode
                 {
-                    checkPointClicks.Insert(lastCheckPointRemovedIndex, position);
+                    if (lastCheckPointRemovedIndex <= checkPointClicks.Count)
+                        checkPointClicks.Insert(lastCheckPointRemovedIndex, position);
                     lastCheckPointRemovedIndex = -1;
                 }
                 else

@@ -108,7 +108,7 @@ public class LevelManager : MonoBehaviour
         if (match.Success)
         {
             int number = int.Parse(match.Value);
-            if (number < 5)  // Load Next Level
+            if (number < 6)  // Load Next Level
                 SceneManager.LoadScene("Level " + (number + 1).ToString());
             else // Back To Main Menu
             {

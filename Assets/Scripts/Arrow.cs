@@ -135,7 +135,7 @@ public class Arrow : MonoBehaviour
     void FollowPath()
     {
         // Check if we reached next checkPoint
-        if (Vector3.Distance(transform.position, levelManager.checkPoints[levelManager.checkPointIndex]) <= 0.35f)
+        if (Vector3.Distance(transform.position, levelManager.checkPoints[levelManager.checkPointIndex]) <= 0.4f)
         {
             if ((levelManager.checkPointIndex + 1) < levelManager.checkPoints.Count)
             {
