@@ -1,3 +1,4 @@
+using RTLTMPro;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -22,6 +23,8 @@ public class LevelManager : MonoBehaviour
     [HideInInspector] public List<Vector3> checkPoints, waitPoints;
     [HideInInspector] public int checkPointIndex, waitPointIndex, checkTest;
     [HideInInspector] public bool levelStarted, levelFinished;
+    [SerializeField] List<string> surasTexts;
+    [SerializeField] RTLTextMeshPro ayeText;
 
     [Space]
     [Header("Classes")]
@@ -121,6 +124,7 @@ public class LevelManager : MonoBehaviour
     {
         waitPointIndex++;
         fetchedSuras.Enqueue(suraSFX[0]);
+        suraSFX.RemoveAt(0);
         if (suraCoroutine == null)
         {
             suraCoroutine = StartCoroutine(PlaySuraIE());
@@ -129,14 +133,19 @@ public class LevelManager : MonoBehaviour
 
     public IEnumerator PlaySuraIE()
     {
+        ayeText.gameObject.SetActive(true);
+        ayeText.text = surasTexts[0];
+        surasTexts.RemoveAt(0);
         suraAudioSource.clip = fetchedSuras.Dequeue();
         suraAudioSource.Play();
         yield return new WaitForSeconds(suraAudioSource.clip.length);
         GameObject toDestroy = quranIconsCreated[0];
         Destroy(toDestroy);
         quranIconsCreated.RemoveAt(0);
-        if (fetchedSuras.Count != 0)
+        if (fetchedSuras.Count != 0) 
+        {
             suraCoroutine = StartCoroutine(PlaySuraIE());
+        }   
         else
             suraCoroutine = null;
     }
