@@ -9,14 +9,15 @@ public class Arrow : MonoBehaviour
     public Animator arrowAnimator;
     [HideInInspector] public bool CanMove;
     public AudioSource sfxPlayer;
+    Vector3 touchPosition, nextPosition;
+    [HideInInspector] public Quaternion firstRotation;
+    [SerializeField] GameObject arrowShapeChild, guideHand;
+    bool showTutorial;
+    Coroutine showTutorialCoroutine;
     [Range(5, 10)]
     [SerializeField] float rotationSpeed = 5f;
     [Range(2, 10)]
     [SerializeField] float firstAnimationSpeed = 2f;
-    Vector3 touchPosition, nextPosition;
-    public Quaternion firstRotation;
-    [SerializeField] GameObject arrowShapeChild, guideHand;
-    bool showTutorial;
 
     [Space]
     [Header("Classes")]
@@ -24,7 +25,7 @@ public class Arrow : MonoBehaviour
 
     private void Start()
     {
-        StartCoroutine(ShowTutorialIE());
+        showTutorialCoroutine = StartCoroutine(ShowTutorialIE());
     }
 
     IEnumerator ShowTutorialIE()
@@ -47,6 +48,14 @@ public class Arrow : MonoBehaviour
         if (showTutorial)
             Tutorial();
 
+        else 
+        {
+            ArrowBehaviour();
+        }
+    }
+
+    void ArrowBehaviour() 
+    {
         // Arrow Starts To Move
         if (Input.GetMouseButtonDown(0))
         {
@@ -54,7 +63,7 @@ public class Arrow : MonoBehaviour
         }
 
         // Dragging Arrow
-        else if (Input.GetMouseButton(0) && CanMove)
+        if (Input.GetMouseButton(0) && CanMove)
         {
             ChangeArrowPosition();
             FollowPath();
@@ -89,6 +98,9 @@ public class Arrow : MonoBehaviour
 
     public void ResetArrow()
     {
+        if (showTutorialCoroutine != null)
+            StopCoroutine(showTutorialCoroutine);
+        showTutorial = false;
         guideHand.SetActive(false);
         transform.position = levelManager.startPosition;
         touchPosition = levelManager.checkPoints[0];
@@ -178,7 +190,7 @@ public class Arrow : MonoBehaviour
         // reached endPoint and doesn't reach it backward ! ( at last Missed Five of checkPoints )
         if (Vector2.Distance(currentPosition, levelManager.endPosition) <= 0.75f && levelManager.checkPointIndex >= levelManager.checkPoints.Count - 5)
         {
-            StartCoroutine(levelManager.FinishGame());
+            levelManager.TimeToScratch();
             Destroy(MaskObjectPool.instance.gameObject);
         }
     }

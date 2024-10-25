@@ -1,5 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.UIElements;
+using Unity.VisualScripting;
+using System.Linq;
 
 public class SpritePointCollector : MonoBehaviour
 {
@@ -10,7 +13,7 @@ public class SpritePointCollector : MonoBehaviour
     public List<Vector3> checkPointClicks = new List<Vector3>();
     public List<Vector3> waitPointClicks = new List<Vector3>();
     [HideInInspector] public bool startPositionToggle, endPositionToggle, removeCheckPointsEnabled, removeWaitPointsEnabled;
-    [HideInInspector] public int pointType, lastCheckPointRemovedIndex = -1, lastWaitPointRemovedIndex = -1;
+    public int pointType, lastCheckPointRemovedIndex = -1, lastWaitPointRemovedIndex = -1;
 
     public void AddPosition(Vector3 position)
     {
@@ -29,7 +32,15 @@ public class SpritePointCollector : MonoBehaviour
                 }
                 else
                 {
-                    checkPointClicks.Add(position);
+                    if (checkPointClicks.Count != 0) 
+                    {
+                        GeneratePointsBasedOnDistance(checkPointClicks[checkPointClicks.Count - 1], position, 0.35f);
+                        // if You Don't Want to Use Automatic Adding Point, Simply Comment Top Line and Use Bellow Line Instead 
+                        //checkPointClicks.Add(position);
+                    }
+                        
+                    else
+                        checkPointClicks.Add(position);
                 }
                 break;
 
@@ -52,6 +63,26 @@ public class SpritePointCollector : MonoBehaviour
                 startPosition = position;
                 break;
         }
+    }
+
+    void GeneratePointsBasedOnDistance(Vector3 start, Vector3 end, float gap)
+    {
+        float totalDistance = Vector3.Distance(start, end); // Calculate the distance
+        int numberOfPoints = Mathf.FloorToInt(totalDistance / gap); // Calculate how many points fit
+        List<Vector3> points = new List<Vector3>();
+
+        for (int i = 1; i <= numberOfPoints; i++)
+        {
+            float t = (float)i / (numberOfPoints + 1);
+            Vector3 point = Vector3.Lerp(start, end, t); // Interpolate the point
+            points.Add(point);
+        }
+        var sortedPoints = points.OrderBy(p => Vector3.Distance(start, p)).ToList();
+        for (int i = 0; i < sortedPoints.Count; i++)
+        {
+            checkPointClicks.Add(sortedPoints[i]);
+        }
+        checkPointClicks.Add(end);
     }
 
     public void RemovePosition(int index)

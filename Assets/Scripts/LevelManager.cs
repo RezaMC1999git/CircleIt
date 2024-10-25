@@ -12,19 +12,24 @@ public class LevelManager : MonoBehaviour
     public static LevelManager instance;
 
     [Header("UI")]
-    public Vector3 startPosition;
-    public Vector3 endPosition;
-    public SpriteRenderer levelShapeBase, levelShapeDotted, levelShapeTouch;
-    public Animator shapeCompleteAnimator;
+    [HideInInspector] public Vector3 startPosition;
+    [HideInInspector] public Vector3 endPosition;
+    public SpriteRenderer levelShapeBase, levelShapeDotted, levelShapeTouch, levelShapeComplete, levelShapeBlackAndWhite;
+    public Animator shapeBWAnimator;
     [SerializeField] GameObject clickCirclePrefab;
-    public GameObject quranIcon;
+    public GameObject quranIcon, dragGuideHand, dragCircle;
     List<GameObject> quranIconsCreated;
     public Transform quranIconsParent;
     [HideInInspector] public List<Vector3> checkPoints, waitPoints;
     [HideInInspector] public int checkPointIndex, waitPointIndex, checkTest;
-    [HideInInspector] public bool levelStarted, levelFinished;
-    [SerializeField] List<string> surasTexts;
+    [HideInInspector] public bool levelStarted, timeToScratch, levelFinished;
+
     [SerializeField] RTLTextMeshPro ayeText;
+    [SerializeField] BoxCollider2D levelShapeBaseBoxCollider;
+    [SerializeField] List<string> surasTexts;
+    [SerializeField]
+    [Range(10, 1000)]
+    public int requiredMasksForFinishingLevel = 175;
 
     [Space]
     [Header("Classes")]
@@ -55,6 +60,8 @@ public class LevelManager : MonoBehaviour
         //WorldToPixelAmount.x = Screen.width / WorldUnitsInCamera.x;
         //WorldToPixelAmount.y = Screen.height / WorldUnitsInCamera.y;
         #endregion
+        dragCircle.SetActive(false);
+        dragGuideHand.SetActive(false);
         quranIconsCreated = new List<GameObject>();
         for (int i = 0; i < waitPoints.Count; i++)
         {
@@ -94,29 +101,53 @@ public class LevelManager : MonoBehaviour
         levelStarted = true;
     }
 
-    public IEnumerator FinishGame()
+    public void TimeToScratch()
+    {
+        StartCoroutine(TimeToScratchIE());
+    }
+
+    public IEnumerator TimeToScratchIE()
     {
         arrow.CanMove = false;
-        levelFinished = true;
+
+        timeToScratch = true;
+
         levelShapeDotted.gameObject.SetActive(false);
         levelShapeTouch.gameObject.SetActive(false);
-        shapeCompleteAnimator.enabled = true;
+        levelShapeComplete.enabled = true;
+        levelShapeBase.maskInteraction = SpriteMaskInteraction.None;
+        shapeBWAnimator.enabled = true;
+        levelShapeBaseBoxCollider.enabled = false;
 
         arrow.sfxPlayer.Stop();
+        arrow.gameObject.SetActive(false);
+        dragGuideHand.SetActive(true);
+        yield return new WaitForSeconds(2);
+        dragGuideHand.SetActive(false);
+    }
+
+    public IEnumerator FinishGame()
+    {
+        timeToScratch = false;
+        levelFinished = true;
+        dragCircle.SetActive(false);
+        levelShapeBlackAndWhite.gameObject.SetActive(false);
+        levelShapeComplete.maskInteraction = SpriteMaskInteraction.None;
         levelCompleteAudioSource.Play();
+
         yield return new WaitForSeconds(4f);
 
         string levelName = SceneManager.GetActiveScene().name;
         Match match = Regex.Match(levelName, @"\d+"); // Find digits in the string
         if (match.Success)
         {
-            int number = int.Parse(match.Value);
-            if (number < 6)  // Load Next Level
-                SceneManager.LoadScene("Level " + (number + 1).ToString());
-            else // Back To Main Menu
-            {
-                SceneManager.LoadScene("Main Menu");
-            }
+            //int number = int.Parse(match.Value);
+            //if (number < 6)  // Load Next Level
+            //    SceneManager.LoadScene("Level " + (number + 1).ToString());
+            //else // Back To Main Menu
+            //{
+            //    SceneManager.LoadScene("Main Menu");
+            //}
         }
     }
 
@@ -142,10 +173,10 @@ public class LevelManager : MonoBehaviour
         GameObject toDestroy = quranIconsCreated[0];
         Destroy(toDestroy);
         quranIconsCreated.RemoveAt(0);
-        if (fetchedSuras.Count != 0) 
+        if (fetchedSuras.Count != 0)
         {
             suraCoroutine = StartCoroutine(PlaySuraIE());
-        }   
+        }
         else
             suraCoroutine = null;
     }
