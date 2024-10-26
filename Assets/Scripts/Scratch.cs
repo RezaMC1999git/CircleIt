@@ -24,7 +24,7 @@ public class Scratch : MonoBehaviour
         if (scratckMasksCreated.Count >= levelManager.requiredMasksForFinishingLevel)
         {
             Destroy(scratchMasksParent.gameObject);
-            StartCoroutine(levelManager.FinishGame());
+            levelManager.FinishGame();
             return;
         }
         if (levelManager.timeToScratch)
@@ -68,8 +68,13 @@ public class Scratch : MonoBehaviour
 
     private void AddMask()
     {
-        GameObject newScratchMask = Instantiate(scratchMaskPrefab, mousePosition, Quaternion.identity);
-        newScratchMask.transform.SetParent(scratchMasksParent);
-        scratckMasksCreated.Add(newScratchMask);
+        GameObject newMask = ScratchMaskObjectPool.instance.getMaskPooledObject();
+
+        if (newMask != null)
+        {
+            newMask.transform.position = mousePosition;
+            newMask.SetActive(true);
+        }
+        scratckMasksCreated.Add(newMask);
     }
 }

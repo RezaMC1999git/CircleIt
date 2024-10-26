@@ -152,7 +152,7 @@ public class Arrow : MonoBehaviour
             if ((levelManager.checkPointIndex + 1) < levelManager.checkPoints.Count)
             {
 
-                GameObject newMask = MaskObjectPool.instance.getMaskPooledObject();
+                GameObject newMask = ShapeMaskObjectPool.instance.getMaskPooledObject();
 
                 if (newMask != null)
                 {
@@ -185,13 +185,13 @@ public class Arrow : MonoBehaviour
 
     public void CheckIfFinished(Vector3 currentPosition)
     {
-        if (!MaskObjectPool.instance)
+        if (!ShapeMaskObjectPool.instance)
             return;
         // reached endPoint and doesn't reach it backward ! ( at last Missed Five of checkPoints )
         if (Vector2.Distance(currentPosition, levelManager.endPosition) <= 0.75f && levelManager.checkPointIndex >= levelManager.checkPoints.Count - 5)
         {
             levelManager.TimeToScratch();
-            Destroy(MaskObjectPool.instance.gameObject);
+            Destroy(ShapeMaskObjectPool.instance.gameObject);
         }
     }
 }

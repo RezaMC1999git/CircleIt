@@ -17,7 +17,7 @@ public class LevelManager : MonoBehaviour
     public SpriteRenderer levelShapeBase, levelShapeDotted, levelShapeTouch, levelShapeComplete, levelShapeBlackAndWhite;
     public Animator shapeBWAnimator;
     [SerializeField] GameObject clickCirclePrefab;
-    public GameObject quranIcon, dragGuideHand, dragCircle;
+    public GameObject quranIcon, dragGuideHand, dragCircle, endPanel;
     List<GameObject> quranIconsCreated;
     public Transform quranIconsParent;
     [HideInInspector] public List<Vector3> checkPoints, waitPoints;
@@ -112,6 +112,8 @@ public class LevelManager : MonoBehaviour
 
         timeToScratch = true;
 
+        Color nearTransparentColor = new Color(levelShapeBase.color.r, levelShapeBase.color.g, levelShapeBase.color.b,0.3f);
+        levelShapeBase.color = nearTransparentColor;
         levelShapeDotted.gameObject.SetActive(false);
         levelShapeTouch.gameObject.SetActive(false);
         levelShapeComplete.enabled = true;
@@ -126,28 +128,44 @@ public class LevelManager : MonoBehaviour
         dragGuideHand.SetActive(false);
     }
 
-    public IEnumerator FinishGame()
+    public void FinishGame() 
+    {
+        StartCoroutine(FinishGameIE());
+    } 
+
+    IEnumerator FinishGameIE()
     {
         timeToScratch = false;
         levelFinished = true;
         dragCircle.SetActive(false);
         levelShapeBlackAndWhite.gameObject.SetActive(false);
+        Color notTransparentColor = new Color(levelShapeBase.color.r, levelShapeBase.color.g, levelShapeBase.color.b, 1f);
+        levelShapeBase.color = notTransparentColor;
         levelShapeComplete.maskInteraction = SpriteMaskInteraction.None;
         levelCompleteAudioSource.Play();
 
-        yield return new WaitForSeconds(4f);
+        yield return new WaitForSeconds(2f);
+        endPanel.SetActive(true);
+    }
 
+    public void RepeatLevelOnClick() 
+    {
+        Application.LoadLevel(SceneManager.GetActiveScene().name);
+    }
+
+    public void NextLevelOnClick()
+    {
         string levelName = SceneManager.GetActiveScene().name;
         Match match = Regex.Match(levelName, @"\d+"); // Find digits in the string
         if (match.Success)
         {
-            //int number = int.Parse(match.Value);
-            //if (number < 6)  // Load Next Level
-            //    SceneManager.LoadScene("Level " + (number + 1).ToString());
-            //else // Back To Main Menu
-            //{
-            //    SceneManager.LoadScene("Main Menu");
-            //}
+            int number = int.Parse(match.Value);
+            if (number < 2)  // Load Next Level
+                SceneManager.LoadScene("Level " + (number + 1).ToString());
+            else // Back To Main Menu
+            {
+                SceneManager.LoadScene("Main Menu");
+            }
         }
     }
 

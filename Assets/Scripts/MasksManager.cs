@@ -9,9 +9,9 @@ public class MasksManager : MonoBehaviour
 
     public void ResetMasks()
     {
-        for (int i = 0; i < MaskObjectPool.instance.transform.childCount; i++)
+        for (int i = 0; i < ShapeMaskObjectPool.instance.transform.childCount; i++)
         {
-            MaskObjectPool.instance.transform.GetChild(i).gameObject.SetActive(false);
+            ShapeMaskObjectPool.instance.transform.GetChild(i).gameObject.SetActive(false);
         }
     }
 }
